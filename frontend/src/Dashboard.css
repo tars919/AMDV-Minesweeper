@@ -1,0 +1,187 @@
+.dashboard-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #000;
+  overflow: hidden;
+}
+
+/* Header */
+.dashboard-header {
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 15px 20px;
+  text-align: center;
+  border-bottom: 2px solid #333;
+}
+
+.dashboard-header h1 {
+  color: white;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+/* Two Panel Layout */
+.dashboard-panels {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Map Panel - Left 45% */
+.map-panel {
+  width: 45%;
+  height: 100%;
+  position: relative;
+  border-right: 2px solid #333;
+}
+
+/* Video Panel - Right 55% */
+.video-panel {
+  width: 55%;
+  height: 100%;
+  position: relative;
+  background-color: #1a1a1a;
+}
+
+/* Mode Controls - Top Right */
+.mode-controls {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+  display: flex;
+  gap: 10px;
+}
+
+.mode-button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: Arial, sans-serif;
+}
+
+.mode-button {
+  background-color: #444;
+  color: #aaa;
+}
+
+.mode-button.active {
+  background-color: #2196F3;
+  color: white;
+  box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+}
+
+.mode-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Video Container */
+.video-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-placeholder {
+  width: 90%;
+  height: 85%;
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-family: Arial, sans-serif;
+  border: 2px solid #444;
+}
+
+/* Joystick - Bottom Right */
+.joystick-container {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  z-index: 10;
+}
+
+.joystick {
+  width: 140px;
+  height: 140px;
+  background-color: rgba(255, 0, 0, 0.8);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+  border: 3px solid white;
+}
+
+.joystick-btn {
+  width: 35px;
+  height: 35px;
+  background-color: white;
+  border: 2px solid #ff0000;
+  border-radius: 5px;
+  color: #ff0000;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin: 2px;
+}
+
+.joystick-btn:hover {
+  background-color: #ff0000;
+  color: white;
+  transform: scale(1.1);
+}
+
+.joystick-btn:active {
+  transform: scale(0.95);
+}
+
+.joystick-middle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.joystick-center {
+  width: 20px;
+  height: 20px;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .dashboard-panels {
+    flex-direction: column;
+  }
+  
+  .map-panel, .video-panel {
+    width: 100%;
+    height: 50%;
+  }
+  
+  .map-panel {
+    border-right: none;
+    border-bottom: 2px solid #333;
+  }
+}
