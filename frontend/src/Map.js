@@ -21,7 +21,7 @@ function MapComponent() {
   const [detectedMines, setDetectedMines] = useState([]);
 
   
-  // Your terrain dimensions: 298px wide × 444px tall
+  // Your terrain dimensions: 300px wide × 445px tall
   // Real world representation: 30m wide × 45m tall
 
   const terrainWidthMeters = 30;
@@ -68,37 +68,129 @@ function MapComponent() {
   ];
 
   const pixelToGPS = (pixelX, pixelY) => {
-  // Normalize to -0.5 to 0.5 range (centered)
-  const xNorm = (pixelX / 300) - 0.5;  // Changed from 298 to 300
-  const yNorm = (pixelY / 445) - 0.5;  // Changed from 444 to 445
-  
-  // Convert to meters
-  const xMeters = xNorm * terrainWidthMeters;
-  const yMeters = -yNorm * terrainHeightMeters; // Negative because image Y goes down, map Y goes up
-  
-  // Apply rotation
-  const xRotated = xMeters * cos - yMeters * sin;
-  const yRotated = xMeters * sin + yMeters * cos;
-  
-  // Convert to GPS
-  const lon = terrainCenter.longitude + (xRotated * metersToDegreesLon);
-  const lat = terrainCenter.latitude + (yRotated * metersToDegreesLat);
-  
-  return { lat, lon };
-};
+    // Normalize to -0.5 to 0.5 range (centered)
+    const xNorm = (pixelX / 300) - 0.5;
+    const yNorm = (pixelY / 445) - 0.5;
+    
+    // Convert to meters
+    const xMeters = xNorm * terrainWidthMeters;
+    const yMeters = -yNorm * terrainHeightMeters;
+    
+    // Apply rotation
+    const xRotated = xMeters * cos - yMeters * sin;
+    const yRotated = xMeters * sin + yMeters * cos;
+    
+    // Convert to GPS
+    const lon = terrainCenter.longitude + (xRotated * metersToDegreesLon);
+    const lat = terrainCenter.latitude + (yRotated * metersToDegreesLat);
+    
+    return { lat, lon };
+  };
 
   // Mine locations based on your pixel coordinates
-  // Total terrain: 300px wide × 445px tall
   const mineLocations = [
     { ...pixelToGPS(226, 74), id: 1, tile: 1, name: 'Mine 1' },
     { ...pixelToGPS(168, 210), id: 2, tile: 2, name: 'Mine 2' },
-    { ...pixelToGPS(202, 360), id: 3, tile: 3, name: 'Mine 3' },  // 300 - 96 = 204 (adjusted from right edge)
+    { ...pixelToGPS(202, 360), id: 3, tile: 3, name: 'Mine 3' },
     { ...pixelToGPS(80, 233), id: 4, tile: 5, name: 'Mine 4' },
     { ...pixelToGPS(127, 326), id: 5, tile: 6, name: 'Mine 5' }
   ];
 
+  // Export detected mine locations to text file
+  const exportMineLocationsText = () => {
+    if (detectedMines.length === 0) {
+      alert('No mines detected yet!');
+      return;
+    }
+
+    // Prepare export data as formatted text
+    let textContent = `AMDV Mine Detection Report
+========================================
+Export Date: ${new Date().toLocaleString()}
+Location: Sagaing Region, Myanmar
+Terrain Center: ${terrainCenter.latitude.toFixed(6)}°N, ${terrainCenter.longitude.toFixed(6)}°E
+
+TERRAIN INFORMATION
+----------------------------------------
+Physical Size: 4ft × 6ft
+Represented Size: 30m × 45m
+Tile Grid: 3×2 (6 tiles total)
+
+DETECTION SUMMARY
+----------------------------------------
+Total Mines Detected: ${detectedMines.length}
+Detection Method: Metal Detector
+
+DETECTED MINE LOCATIONS
+----------------------------------------
+`;
+
+    detectedMines.forEach((mine, index) => {
+      textContent += `
+Mine #${index + 1}
+  Latitude:  ${mine.lat.toFixed(8)}°
+  Longitude: ${mine.lon.toFixed(8)}°
+  Timestamp: ${mine.timestamp ? new Date(mine.timestamp).toLocaleString() : 'N/A'}
+  Method:    ${mine.method || 'Metal Detector'}
+`;
+    });
+
+    textContent += `
+========================================
+End of Report
+`;
+
+    // Create blob and download as .txt
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `AMDV-Mine-Report-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    // Success message
+    alert(`Successfully exported ${detectedMines.length} mine location(s) to text file!`);
+  };
+
+  // Export detected mine locations to CSV file
+  const exportMineLocationsCSV = () => {
+    if (detectedMines.length === 0) {
+      alert('No mines detected yet!');
+      return;
+    }
+
+    // CSV Header
+    let csvContent = 'Mine ID,Latitude,Longitude,Timestamp,Detection Method,Tile\n';
+
+    // CSV Data Rows
+    detectedMines.forEach((mine, index) => {
+      const timestamp = mine.timestamp ? new Date(mine.timestamp).toLocaleString() : 'N/A';
+      const method = mine.method || 'Metal Detector';
+      const tile = mine.tile || 'N/A';
+      
+      csvContent += `${index + 1},${mine.lat.toFixed(8)},${mine.lon.toFixed(8)},"${timestamp}","${method}",${tile}\n`;
+    });
+
+    // Create blob and download as .csv
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `AMDV-Mine-Locations-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    // Success message
+    alert(`Successfully exported ${detectedMines.length} mine location(s) to CSV file!`);
+  };
+
   return (
-    <div style={{ width: '100%', height: '100vh' }}>
+    <div style={{ width: '100%', height: '100%' }}>
       <Map
         {...viewState}
         onMove={evt => setViewState(evt.viewState)}
@@ -194,7 +286,7 @@ function MapComponent() {
         onClick={() => setShowMines(!showMines)}
         style={{
           position: 'absolute',
-          top: '80px',
+          top: '20px',
           left: '10px',
           zIndex: 1,
           backgroundColor: showMines ? '#ff9800' : '#4CAF50',
@@ -210,6 +302,40 @@ function MapComponent() {
         }}
       >
         {showMines ? '🔒 Hide Mine Locations' : '🗺️ Show Mine Locations'}
+      </button>
+
+      {/* Simulate Detection Button */}
+      <button
+        onClick={() => {
+          if (detectedMines.length < mineLocations.length) {
+            const nextMine = mineLocations[detectedMines.length];
+            setDetectedMines([...detectedMines, {
+              ...nextMine,
+              timestamp: new Date().toISOString(),
+              method: 'Metal Detector (Simulated)'
+            }]);
+          } else {
+            alert('All mines have been detected!');
+          }
+        }}
+        style={{
+          position: 'absolute',
+          top: '80px',
+          left: '10px',
+          zIndex: 1,
+          backgroundColor: '#FF9800',
+          color: 'white',
+          border: 'none',
+          padding: '12px 20px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontWeight: 'bold',
+          cursor: 'pointer',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          fontFamily: 'Arial, sans-serif'
+        }}
+      >
+        🎯 Simulate Detection
       </button>
 
       {/* Info Panel */}
@@ -235,6 +361,74 @@ function MapComponent() {
         <div style={{ fontSize: '10px', marginTop: '8px', opacity: 0.8 }}>
           Tile Grid: 3×2 (4ft × 6ft)
         </div>
+        
+        {/* Export as Text Button */}
+        <button
+          onClick={exportMineLocationsText}
+          style={{
+            marginTop: '15px',
+            width: '100%',
+            padding: '10px',
+            backgroundColor: detectedMines.length > 0 ? '#4CAF50' : '#666',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            cursor: detectedMines.length > 0 ? 'pointer' : 'not-allowed',
+            fontFamily: 'Arial, sans-serif',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            if (detectedMines.length > 0) {
+              e.target.style.backgroundColor = '#45a049';
+              e.target.style.transform = 'translateY(-2px)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (detectedMines.length > 0) {
+              e.target.style.backgroundColor = '#4CAF50';
+              e.target.style.transform = 'translateY(0)';
+            }
+          }}
+          disabled={detectedMines.length === 0}
+        >
+          📄 Export as Text
+        </button>
+
+        {/* Export as CSV Button */}
+        <button
+          onClick={exportMineLocationsCSV}
+          style={{
+            marginTop: '10px',
+            width: '100%',
+            padding: '10px',
+            backgroundColor: detectedMines.length > 0 ? '#2196F3' : '#666',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            fontSize: '12px',
+            fontWeight: 'bold',
+            cursor: detectedMines.length > 0 ? 'pointer' : 'not-allowed',
+            fontFamily: 'Arial, sans-serif',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            if (detectedMines.length > 0) {
+              e.target.style.backgroundColor = '#1976D2';
+              e.target.style.transform = 'translateY(-2px)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (detectedMines.length > 0) {
+              e.target.style.backgroundColor = '#2196F3';
+              e.target.style.transform = 'translateY(0)';
+            }
+          }}
+          disabled={detectedMines.length === 0}
+        >
+          📊 Export as CSV
+        </button>
       </div>
     </div>
   );
