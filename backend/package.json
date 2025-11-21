@@ -1,0 +1,14 @@
+{
+  "name": "amdv-backend",
+  "version": "1.0.0",
+  "description": "AMDV Backend Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2",
+    "serialport": "^12.0.0"
+  }
+}
