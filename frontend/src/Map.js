@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Map, Marker, Source, Layer } from 'react-map-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -95,6 +95,48 @@ function MapComponent() {
     { ...pixelToGPS(80, 233), id: 4, tile: 5, name: 'Mine 4' },
     { ...pixelToGPS(127, 326), id: 5, tile: 6, name: 'Mine 5' }
   ];
+
+  // WebSocket connection to backend for Arduino detection
+  useEffect(() => {
+    const ws = new WebSocket('ws://localhost:3001');
+
+    ws.onopen = () => {
+      console.log('✅ Connected to backend');
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === 'MINE_DETECTED') {
+        console.log('🚨 Mine detection received from Arduino!');
+        
+        // Add next mine in sequence
+        if (detectedMines.length < mineLocations.length) {
+          const nextMine = mineLocations[detectedMines.length];
+          setDetectedMines(prev => [...prev, {
+            ...nextMine,
+            timestamp: data.timestamp,
+            method: 'Metal Detector (Arduino)'
+          }]);
+        } else {
+          console.log('All mines already detected');
+        }
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error('❌ WebSocket error:', error);
+    };
+
+    ws.onclose = () => {
+      console.log('❌ Disconnected from backend');
+    };
+
+    // Cleanup on component unmount
+    return () => {
+      ws.close();
+    };
+  }, [detectedMines.length, mineLocations]);
 
   // Export detected mine locations to text file
   const exportMineLocationsText = () => {
