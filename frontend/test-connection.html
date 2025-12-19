@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stream Test</title>
+</head>
+<body style="background: #000; color: #fff; padding: 20px;">
+  <h1>Jetson Stream Test</h1>
+  <img 
+    src="http://192.168.137.225:5000/video_feed" 
+    style="max-width: 100%; border: 2px solid #4CAF50;"
+    onerror="document.getElementById('error').style.display='block';"
+    onload="document.getElementById('success').style.display='block';"
+  />
+  <div id="error" style="display:none; color: red; margin-top: 20px;">
+    ❌ Stream failed to load - check Jetson connection
+  </div>
+  <div id="success" style="display:none; color: green; margin-top: 20px;">
+    ✅ Stream loaded successfully
+  </div>
+</body>
+</html>
